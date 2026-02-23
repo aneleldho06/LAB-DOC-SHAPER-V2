@@ -14,9 +14,9 @@ app.use(cors());
 app.use(express.json());
 
 // Setup file uploads
-const UPLOAD_DIR = path.join(__dirname, 'uploads');
+const UPLOAD_DIR = process.env.VERCEL ? '/tmp/uploads' : path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) {
-    fs.mkdirSync(UPLOAD_DIR);
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
 const storage = multer.diskStorage({
@@ -167,7 +167,8 @@ app.post('/api/generate', async (req, res) => {
 
         // 4. Create temp output file path
         const outFileName = `My_${labInfo.lab_id}.docx`;
-        const tempDir = fs.mkdtempSync(path.join(__dirname, 'uploads', 'tmp-'));
+        const tmpBaseDir = process.env.VERCEL ? '/tmp/tmp-' : path.join(__dirname, 'uploads', 'tmp-');
+        const tempDir = fs.mkdtempSync(tmpBaseDir);
         const outPath = path.join(tempDir, outFileName);
 
         // 5. Generate replaced document
@@ -193,7 +194,11 @@ app.post('/api/generate', async (req, res) => {
     }
 });
 
-// Start Server
-app.listen(port, () => {
-    console.log(`Backend Server running on port ${port}`);
-});
+// Start Server (only if run directly)
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`Backend Server running on port ${port}`);
+    });
+}
+module.exports = app;
+
