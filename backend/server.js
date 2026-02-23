@@ -194,11 +194,9 @@ app.post('/api/generate', async (req, res) => {
     }
 });
 
-// Start Server (only if run directly)
-if (require.main === module) {
-    app.listen(port, () => {
-        console.log(`Backend Server running on port ${port}`);
-    });
-}
-module.exports = app;
+// Start Server (for Render + local)
+app.listen(port, () => {
+    console.log(`Backend Server running on port ${port}`);
+});
 
+module.exports = app;
